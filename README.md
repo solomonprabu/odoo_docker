@@ -18,7 +18,7 @@ Updating the image tag lets you to use the desired Odoo version. By default, the
 
 ## Usage
 
-This project uses a custom-named compose file (`odoo18-docker-compose.yml`). Therefore, you must specify the filename using the `-f` flag in all your `docker compose` commands.
+This project uses a custom-named compose file (`odoo-docker-compose.yml`). Therefore, you must specify the filename using the `-f` flag in all your `docker compose` commands.
 
 ### Starting the Environment
 
