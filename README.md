@@ -1,11 +1,20 @@
 # Odoo Docker
 
-Docker compose file to run Odoo 18 in Docker with PostgreSQL, live code reloading (watch), and test coverage capabilities.
+Docker compose file to run Odoo in Docker with PostgreSQL, live code reloading (watch), and test coverage capabilities.
 
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
+
+## Changing Odoo Version
+
+Updating the image tag lets you to use the desired Odoo version. By default, the compose file is configured to use Odoo 18 (`image: odoo:18`). You can easily switch to other versions by modifying the `image` field for the `odoo_web` and `odoo_test` services inside `odoo18-docker-compose.yml`.
+
+**Examples:**
+- For Odoo 17: change to `image: odoo:17`
+- For Odoo 16: change to `image: odoo:16`
+- For Odoo 15: change to `image: odoo:15`
 
 ## Usage
 
