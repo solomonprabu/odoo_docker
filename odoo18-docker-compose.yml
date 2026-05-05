@@ -1,0 +1,73 @@
+services:
+  db:
+    image: postgres:16
+    container_name: odoo-db-18
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo
+    volumes:
+      - odoo18-db-data:/var/lib/postgresql/data
+
+  odoo_web:
+    image: odoo:18
+    container_name: odoo-web-18
+    ports:
+      - "8069:8069"
+    depends_on:
+      - db
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=odoo
+      - ADMIN_PASSWD=admin
+    volumes:
+      - odoo18-web-data:/var/lib/odoo
+      - /home/user-name/Documents/OCA/custom-folder1:/mnt/extra-addons/custom-folder1
+      - /home/user-name/Documents/OCA/custom-folder2:/mnt/extra-addons/custom-folder2
+    command:
+      - --addons-path=/mnt/extra-addons/custom-folder1,/mnt/extra-addons/custom-folder2,/usr/lib/python3/dist-packages/odoo/addons
+    # --- Docker Watch Configuration ---
+    develop:
+      watch:
+        - path: /home/user-name/Documents/OCA/custom-folder1
+          action: restart
+          target: /mnt/extra-addons/custom-folder1
+        - path: /home/user-name/Documents/OCA/custom-folder2
+          action: restart
+          target: /mnt/extra-addons/custom-folder2
+
+  odoo_test:
+    image: odoo:18
+    container_name: odoo-test-18
+    depends_on:
+      - db
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=odoo
+      - ADMIN_PASSWD=admin
+      # Specify the module you want to test here. (e.g, account_move)
+      - MODULES_TO_TEST=${MODULES_TO_TEST:-account_move}
+      # Specify the test tags here. i.e ClassName or ClassName.methodName (e.g, TestAccountInvoiceLine or TestAccountInvoiceLine.test_invoice_line_01)
+      - TEST_TAGS=${TEST_TAGS:-TestIrHttp.test_session_info_internal_user}
+    volumes:
+      - odoo18-web-data:/var/lib/odoo
+      - /home/user-name/Documents/OCA/custom-folder1:/mnt/extra-addons/custom-folder1
+      - /home/user-name/Documents/OCA/custom-folder2:/mnt/extra-addons/custom-folder2
+    command: >
+      bash -c "
+      python3 -m pip install --user coverage --break-system-packages &&
+      export PATH=$$PATH:/var/lib/odoo/.local/bin &&
+      export COVERAGE_FILE=/var/lib/odoo/.coverage &&
+      echo \"Running tests with coverage for: $$MODULES_TO_TEST\" &&
+      coverage run --source=/mnt/extra-addons/custom-folder1/$$MODULES_TO_TEST /usr/bin/odoo --db_host=$$HOST --db_user=$$USER --db_password=$$PASSWORD -d test --addons-path=/mnt/extra-addons/custom-folder1,/mnt/extra-addons/custom-folder2,/usr/lib/python3/dist-packages/odoo/addons --test-enable --stop-after-init --test-tags $$MODULES_TO_TEST:$$TEST_TAGS &&
+      coverage report -m &&
+      coverage html -d /mnt/extra-addons/custom-folder1/coverage_report
+      "
+    profiles:
+      - test
+
+volumes:
+  odoo18-db-data:
+  odoo18-web-data:
